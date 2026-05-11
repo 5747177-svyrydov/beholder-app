@@ -282,6 +282,24 @@ span.logic-node-text {
   height: calc(var(--logic-node-h) + 20px);
 }
 
+.marker-pair-node {
+  width: var(--marker-node-w);
+  height: var(--marker-node-h);
+}
+
+.marker-pair-node-text {
+  font-weight: 800;
+  text-transform: capitalize;
+  font-size: 18px;
+  height: 100%;
+  padding-top: calc(var(--marker-node-h) * 0.5 - 10px - var(--node-padding-vertical));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  margin: 0 20px;
+}
+
 /* .key-node::after {
   position: absolute;
   top: 3px;

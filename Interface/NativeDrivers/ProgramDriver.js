@@ -83,6 +83,45 @@ function updateNode(node, input, field) {
         out.targets.forEach((t) => updateNode(programGraph[t.uuid], input[node.ID][out.property], t.field));
       });
       break;
+    case 'marker-pair':
+      // input for a marker pair node will be the markers
+      // node.ID_A and node.ID_B should come from input values
+      const markerA = input[Math.floor(node.ID_A)];
+      const markerB = input[Math.floor(node.ID_B)];
+
+      // Calculate distance between markers
+      const distance = Math.sqrt(Math.pow(markerA.posX - markerB.posX, 2) + Math.pow(markerA.posY - markerB.posY, 2));
+
+      // Calculate angle between markers
+      const angleBetween = markerA.rotation - markerB.rotation;
+
+      // Calculate relative position of marker B relative to marker A
+      const relativePosX = markerB.posX - markerA.posX;
+      const relativePosY = markerB.posY - markerA.posY;
+
+      // Update outputs
+      R.toPairs(node.outputs).forEach(([key, out]) => {
+        let outputValue;
+        switch(key) {
+          case 'DISTANCE':
+            outputValue = distance;
+            break;
+          case 'ANGLE_BETWEEN':
+            outputValue = angleBetween;
+            break;
+          case 'RELATIVE_POSITION_X':
+            outputValue = relativePosX;
+            break;
+          case 'RELATIVE_POSITION_Y':
+            outputValue = relativePosY;
+            break;
+          default:
+            outputValue = 0;
+        }
+
+        out.targets.forEach((t) => updateNode(programGraph[t.uuid], outputValue, t.field));
+      });
+      break;
     case 'value-change':
       // add value to running tab
       node.totalDelta += input - node.lastValue;

@@ -19,7 +19,10 @@ function view(display$, position$) {
       },
       [
         div('.palette-category', ['VARIABLES', ul([button('.create-button', { dataset: { type: 'number' } }, 'Number')])]),
-        div('.palette-category', ['MARKER', ul([button('.create-button', { dataset: { type: 'marker' } }, 'Detect Marker')])]),
+        div('.palette-category', ['MARKER', ul([
+          button('.create-button', { dataset: { type: 'marker' } }, 'Detect Marker'),
+          button('.create-button', { dataset: { type: 'marker-pair' } }, 'Marker Pair')
+        ])]),
         div('.palette-category', ['LOGIC', ul([
           button('.create-button', { dataset: { type: 'NOT' } }, 'NOT Gate'),
           button('.create-button', { dataset: { type: 'AND' } }, 'AND Gate'),

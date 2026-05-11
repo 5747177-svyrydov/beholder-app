@@ -12,6 +12,7 @@ import { createNOTLogicNode } from "../Components/NOTLogicNode";
 import { createORLogicNode } from "../Components/ORLogicNode";
 import { createBetweenLogicNode } from "../Components/BetweenLogicNode";
 import { createPeriodicNode } from "../Components/PeriodicNode";
+import { createMarkerPairNode } from "../Components/MarkerPairNode";
 
 export default {
   marker: createMarkerNode,
@@ -28,4 +29,5 @@ export default {
   'greater-than': createGreaterThanLogicNode,
   'less-than': createLessThanLogicNode,
   periodic: createPeriodicNode,
+  'marker-pair': createMarkerPairNode,
 };

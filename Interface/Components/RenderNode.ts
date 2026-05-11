@@ -4,6 +4,7 @@ import { renderKeyTapNode } from "./KeyTapNode";
 import { renderNumberNode } from "./NumberNode";
 import { renderDetectionPanel } from "./DetectionNode";
 import { renderAngleChangeNode } from "./AngleChangeNode";
+import { renderMarkerPairNode } from "./MarkerPairNode";
 import { renderValueChangeNode } from "./ValueChangeNode";
 import { renderANDLogicNode } from "./ANDLogicNode";
 import { renderGreaterThanLogicNode } from "./GreaterThanLogicNode";
@@ -21,6 +22,7 @@ export default {
   detection: renderDetectionPanel,
   'value-change': renderValueChangeNode,
   'angle-change': renderAngleChangeNode,
+  'marker-pair': renderMarkerPairNode,
   between: renderBetweenLogicNode,
   AND: renderANDLogicNode,
   NOT: renderNOTLogicNode,
