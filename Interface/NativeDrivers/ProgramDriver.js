@@ -1,18 +1,24 @@
-// console.log(path.join(__dirname, `../../../Native/LocalMarkerDetection/build/detectMarker${process.platform == 'win32' ? '.exe' : ''}`));
-let keyEmulationPath = `./Native/KeyboardEmulation/build/keyboardEmulation${process.platform == 'win32' ? '.exe' : ''}`;
-if (IS_MAC_PROD) keyEmulationPath = path.join(__dirname, '../../../Native/KeyboardEmulation/build/keyboardEmulation');
+(() => {
+if (!window.ProgramDriver) {
+  const fs = window.fs || require('fs');
+  window.fs = fs;
+  // console.log(path.join(__dirname, `../../../Native/LocalMarkerDetection/build/detectMarker${process.platform == 'win32' ? '.exe' : ''}`));
+  let keyEmulationPath = `./Native/KeyboardEmulation/build/keyboardEmulation${process.platform == 'win32' ? '.exe' : ''}`;
+  if (IS_MAC_PROD) keyEmulationPath = path.join(__dirname, '../../../Native/KeyboardEmulation/build/keyboardEmulation');
 
-let getKeyCode;
-if (process.platform === 'win32') getKeyCode = require('./NativeDrivers/Utils/WinKeyMap.js');
-else getKeyCode = require('./NativeDrivers/Utils/MacKeyMap.js');
+  let getKeyCode;
+  if (process.platform === 'win32') getKeyCode = require('./NativeDrivers/Utils/WinKeyMap.js');
+  else getKeyCode = require('./NativeDrivers/Utils/MacKeyMap.js');
 
-let keyThread;
-let shouldRun = false;
+  let keyThread;
+  let keyboardEnabled = false;
+  let shouldRun = false;
 
 // hack for periodic :()
 let dt = 0;
 
 function pressKey(key) {
+  if (!keyboardEnabled || !keyThread) return;
   const hex = getKeyCode(key);
   keyThread.stdin.cork();
   keyThread.stdin.write(`P:${hex}\r\n`);
@@ -20,6 +26,7 @@ function pressKey(key) {
 }
 
 function releaseKey(key) {
+  if (!keyboardEnabled || !keyThread) return;
   const hex = getKeyCode(key);
   keyThread.stdin.cork();
   keyThread.stdin.write(`R:${hex}\r\n`);
@@ -27,7 +34,21 @@ function releaseKey(key) {
 }
 
 function initKeyboard() {
-  keyThread = spawn(keyEmulationPath);
+  if (!fs.existsSync(keyEmulationPath)) {
+    console.warn(`ProgramDriver: keyboard emulator not found at ${keyEmulationPath}. Key emulation disabled.`);
+    keyboardEnabled = false;
+    return;
+  }
+
+  try {
+    keyThread = spawn(keyEmulationPath);
+  } catch (err) {
+    console.error('ProgramDriver: failed to spawn keyboard emulator', err);
+    keyboardEnabled = false;
+    return;
+  }
+
+  keyboardEnabled = true;
   window.addEventListener("beforeunload", () => { keyThread.kill() });
   keyThread.stdin.setDefaultEncoding('utf-8');
   keyThread.stdout.on('data', (rawData) => {
@@ -295,6 +316,10 @@ function ProgramDriver(programGraph$) {
 
   return xs.empty();
 }
+
+  window.ProgramDriver = ProgramDriver;
+}
+})();
 
 // EX marker datastructure
 // 0981d347-6b9a-4090-963b-a9be2fa7249e:

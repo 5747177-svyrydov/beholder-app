@@ -1,15 +1,19 @@
-const Marker = require('./NativeDrivers/Utils/Marker.js');
-const Vec2 = require('./NativeDrivers/Utils/Vec2.js');
+(() => {
+  if (!window.WebcamDetectionDriver) {
+    const fs = window.fs || require('fs');
+    window.fs = fs;
+    const Marker = require('./NativeDrivers/Utils/Marker.js');
+    const Vec2 = require('./NativeDrivers/Utils/Vec2.js');
 
-let detectExePath = `./Native/LocalMarkerDetection/build/detectMarker${process.platform == 'win32' ? '.exe' : ''}`;
-if (IS_MAC_PROD) detectExePath = path.join(__dirname, `../../../Native/LocalMarkerDetection/build/detectMarker${process.platform == 'win32' ? '.exe' : ''}`);
-let detectImgPath = '../Native/LocalMarkerDetection/build/frame.jpg?';
-if (ELECTRON_ENV == 'PROD') detectImgPath = path.join(__dirname, '../../../Native/LocalMarkerDetection/build/frame.jpg?');
+    let detectExePath = `./Native/LocalMarkerDetection/build/detectMarker${process.platform == 'win32' ? '.exe' : ''}`;
+  if (IS_MAC_PROD) detectExePath = path.join(__dirname, `../../../Native/LocalMarkerDetection/build/detectMarker${process.platform == 'win32' ? '.exe' : ''}`);
+  let detectImgPath = '../Native/LocalMarkerDetection/build/frame.jpg?';
+  if (ELECTRON_ENV == 'PROD') detectImgPath = path.join(__dirname, '../../../Native/LocalMarkerDetection/build/frame.jpg?');
 
-const AXIS_VEC = new Vec2(1.0, 0);
+  const AXIS_VEC = new Vec2(1.0, 0);
 
-console.log(detectExePath);
-function WebcamDetectionDriver(cameraFeedChanges$) {
+  console.log(detectExePath);
+  function WebcamDetectionDriver(cameraFeedChanges$) {
   // Marker stuff
   const markers = [];
   for (let i = 0; i < 1000; i++) {
@@ -34,7 +38,19 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
   })
 
   // detection thread init
-  const detectThread = spawn(detectExePath);
+  if (!fs.existsSync(detectExePath)) {
+    console.warn(`WebcamDetectionDriver: native detector not found at ${detectExePath}. Detection disabled.`);
+    return xs.never();
+  }
+
+  let detectThread;
+  try {
+    detectThread = spawn(detectExePath);
+  } catch (err) {
+    console.error('WebcamDetectionDriver: failed to spawn detection process', err);
+    return xs.never();
+  }
+
   detectThread.stdin.setDefaultEncoding('utf-8');
   window.addEventListener("beforeunload", () => { detectThread.kill() });
 
@@ -81,7 +97,7 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
         });
 
         markers.forEach((m) => m.updatePresence(dt));
-        runProgram(markers, dt);
+        // runProgram(markers, dt); // Закомментировано, так как функция не определена
         listener.next(markers);
       }
 
@@ -120,3 +136,7 @@ function WebcamDetectionDriver(cameraFeedChanges$) {
   const detection$ = xs.create(detectedProducer);
   return detection$;
 }
+
+  window.WebcamDetectionDriver = WebcamDetectionDriver;
+}
+})();

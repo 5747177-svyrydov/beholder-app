@@ -74,7 +74,6 @@ export default function CommandReducer(oldNodes, action) {
     case 'select':
       const selectCount = R.values(nodes).filter(R.prop('selected')).length;
       
-      console.warn('need a clause here for move then mouseup');
       if (action.uuid === '' || (!action.multiselect && !(action.mButton === 'down' && selectCount > 1))) {
         // deselect all others unless it's a multiselect
         R.values(nodes).forEach((n) => {

@@ -22,6 +22,13 @@ function main(sources: any) {
   const spaceIsHeld$ = xs.merge(spacebarDown$.mapTo(true), spacebarUp$.mapTo(false)).startWith(false);
 
   const esc$ = globalKeyDown$.filter((ev) => ev.key === 'Escape');
+  const arrowUp$ = globalKeyDown$.filter((ev) => ev.key === 'ArrowUp');
+  arrowUp$.subscribe({
+    next: () => {
+      const loadInput = document.querySelector('#load-input') as HTMLInputElement;
+      if (loadInput) loadInput.click();
+    }
+  });
   const rightClick$ = fromEvent(document, 'contextmenu').map((ev) => { ev.preventDefault(); return ev; });
   const runStopButton$ = DOM.select('#run-button').events('click').fold((prev) => !prev, false).startWith(false);
 

@@ -23,8 +23,8 @@ function createWindow() {
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, "./Interface/index.html"));
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  // Open DevTools for debugging
+  mainWindow.webContents.openDevTools();
 }
 
 // This method will be called when Electron has finished
