@@ -2,9 +2,14 @@ import { div, img, span, select, option, input } from '@cycle/dom';
 
 let cameras = [];
 navigator.mediaDevices.enumerateDevices().then(function (devices) {
-  for(var i = 0; i < devices.length; i ++){
-    cameras = devices.filter(({ kind }) => kind == 'videoinput');
-  };
+  const videoDevices = devices.filter(({ kind }) => kind == 'videoinput');
+  cameras = videoDevices.map((c, i) => {
+    // Swap indices 0 and 1 because OpenCV driver enumerates them in reverse order to the browser
+    const openCvIndex = i === 0 ? 1 : (i === 1 ? 0 : i);
+    return { label: c.label, openCvIndex };
+  });
+  // Sort so that OpenCV index 0 (Acer HD) is first, making it the default selected option
+  cameras.sort((a, b) => a.openCvIndex - b.openCvIndex);
 });
 
 // this should only be updated every couple of frames probs, not every update
@@ -21,7 +26,7 @@ export function renderDetectionPanel(props, { panX, panY }) {
         select(
           '.detection-select.camera-select',
           { dataset: { uuid: 'detection-panel' } },
-          cameras.map((c, value) => option({ attrs: { value }}, c.label))
+          cameras.map((c) => option({ attrs: { value: c.openCvIndex }}, c.label))
         ),
       ]),
       div('.detection-parameter', [
